@@ -169,7 +169,23 @@ regressions, we will interrogate the set-up of our problem.
 
 % qwer
 \begin{solution}
-	Your solution here.
+
+\textbf{1.}
+
+The original data from the EPICA Dome C provides detailed deuterium profiles and temperature estimates, which were derived from ice core samples extending back approximately 800,000 years.\\
+
+The data processing involve corrections for seawater isotopic composition and ice sheet elevation to estimate temperature differences from the average of the last 1000 years. This included calibrating raw isotopic measurements to reflect past temperatures, accounting for geographic and environmental changes over time, and possibly interpolating or smoothing data to handle gaps or anomalies. This shows that to prepare the sampled data, decisions about how to adjust for these environmental factors and the age model were necessary. The temperature in the temperature column corresponds to estimated differences in annual temperatures from a 1000-year average, and this reflects broader climatic changes rather than localized weather patterns. The temperature values represent anomalies relative to a baseline, likely involving models to adjust for various factors like changes in Earth's orbit or volcanic activity.
+
+\bigskip
+\textbf{2.}
+
+Using the periodicity observed in ancient climate data to argue that the Earth will naturally cool again after a warming phase is misleading when discussing current climate change. It is true that Earth's climate has experienced natural fluctuations over millennia due to various factors like volcanic activity, solar radiation changes, and Earth's orbital variations. However, the rapid rate of current global warming, largely attributed to human activities like burning fossil fuels, deforestation, etc is unprecedented in this historical context. Relying solely on past climate cycles to predict future cooling ignores the impact of anthropogenic greenhouse gas emissions, which have significantly changed the Earth's energy balance.
+
+\bigskip
+\textbf{3.}
+
+Interpolating temperatures for years not in the training set is particularly useful for reconstructing historical climate patterns, help us understand climate variability and trends over time. This can inform climate models, improve predictions of future climate scenarios, and guide policy and decision-making related to climate change adaptation and mitigation. It also can help scientists understand the impact of past climatic events on biodiversity, ecosystems etc.
+
 \end{solution}
 % rewq
 
@@ -227,7 +243,77 @@ Include your plot in your solution PDF.
 
 % qwer
 \begin{solution}
-	Your solution here.
+
+\textbf{1.}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{image.png}
+    \caption{Resulting plot}
+    \label{fig:enter-label}
+\end{figure}
+
+For \(\tau = 1\), the fit is highly sensitive to the training data points, resulting in a jagged and fluctuating prediction line. This indicates a model that closely follows every up and down in the training set, leading to high variance and potential overfitting.\\
+
+With \(\tau = 50\), the prediction curve becomes smoother, indicating a more generalized model that balances fitting to the data while avoiding overfitting to individual data points.\\
+
+For \(\tau = 2500\), the model is very smooth, with predictions that show only the broadest trends in the data. This level of smoothness suggests a high-bias model that may underfit the data though.
+
+\bigskip
+\textbf{2.}
+
+For the kernel-based regressor, the MSE over the test set can be expressed as below:
+
+$$
+\text{MSE} = \frac{1}{M} \sum_{m=1}^M \left(f_\tau(x_m') - y_m'\right)^2
+$$
+
+Given the definition of \(f_\tau(x^*)\) as
+
+$$
+f_\tau\left(x^*\right)=\frac{\sum_n K_\tau\left(x_n, x^*\right) y_n}{\sum_n K_\tau\left(x_n, x^*\right)}
+$$
+
+We can substitute \(f_\tau(x_m')\) in the MSE formula to get the expression for MSE in terms of the training set \(\left\{\left(x_n, y_n\right)\right\}_{n=1}^N\), the test set \(\left\{\left(x_m', y_m'\right)\right\}_{m=1}^M\), and the kernel function \(K_\tau\):
+
+$$
+\text{MSE} = \frac{1}{M} \sum_{m=1}^M \left(\frac{\sum_n K_\tau\left(x_n, x_m'\right) y_n}{\sum_n K_\tau\left(x_n, x_m'\right)} - y_m'\right)^2
+$$
+
+\bigskip
+\textbf{3.}
+
+When the training set is used as the test set, and we evaluate the expression for MSE with the aim of choosing the value of \(\tau\) that minimizes the loss, the chosen value of \(\tau\) would tend towards a very small number, approaching zero. This is because, as \(\tau\) becomes very small, the kernel \(K_\tau(x, x')\) becomes extremely sensitive to the distance between \(x\) and \(x'\).\\
+
+For \(x = x'\), \(K_\tau(x, x')\) approaches 1 as \(\tau\) approaches 0 because the exponent \(\exp\left\{-\frac{(x-x')^2}{\tau}\right\}\) approaches \(\exp\{0\} = 1\). This means that the weight of the point itself becomes quite large compared to other points, making the prediction \(f_\tau(x^*)\) very close to the actual value \(y\) for the training points. The model becomes good at predicting the training data because it's essentially just memorizing the whole dataset. \\
+
+For \(x \neq x'\), as \(\tau\) becomes very small, \(K_\tau(x, x')\) approaches 0, meaning that points even slightly distant from \(x^*\) have virtually no influence on the prediction. This results in a model that is highly overfitted to the training data, capturing noise in the training set as if it were a genuine pattern.\\
+
+Choosing \(\tau\) in this way is a bad idea because it leads to overfitting. The model will perform exceptionally well on the training data but will likely perform poorly on unseen data because it has learned the noise and specific patterns of the training set rather than generalizable patterns. It gives an overly optimistic estimate of the model's predictive performance and does not provide information about how the model will perform on new, unseen data.
+
+
+\bigskip
+\textbf{4.}
+
+\begin{itemize}
+    \item tau = 1: loss = 1.9472621565209178
+    \item tau = 50: loss = 1.8582899169613447
+    \item tau = 2500: loss = 8.333886806980791
+\end{itemize}
+
+\begin{enumerate}
+    \item For \(\tau = 1\), the MSE is approximately \(1.947\), indicating a relatively close fit to the test data but with a potential for overfitting, as a smaller \(\tau\) value makes the model sensitive to small fluctuations in the training data.
+    \item For \(\tau = 50\), the MSE slightly improves to approximately \(1.858\), suggesting a better generalization to the test data. This indicates that a \(\tau\) of 50 provides a good balance between bias and variance, capturing the underlying trends without overfitting to noise.
+    \item For \(\tau = 2500\), the MSE significantly increases to approximately \(8.334\), indicating underfitting. At this level, the model is too smooth, failing to capture the necessary detail and variation in the data to make accurate predictions.
+\end{enumerate}
+
+These results suggest that a \(\tau\) value around 50 is optimal to minimize the prediction error on the test set.
+
+\bigskip
+\textbf{5.}
+
+The time and space complexity of kernelized regression both scale linearly with the size of the training set \(N\). The space complexity is \(O(N)\) because the model must store all \(N\) training data points to make predictions. The time complexity for making a prediction for a new input \(x^*\) is also \(O(N)\), as the algorithm computes the kernel function between \(x^*\) and each of the \(N\) training points and then calculates a weighted average based on these computations. So, as the training set size increases, both the amount of memory required to store the model and the computational effort needed to make a single prediction increase linearly.
+
 \end{solution}
 % rewq
 
@@ -276,10 +362,32 @@ nearest-neighbors.  Recall that kNN uses a predictor of the form
 
 % qwer
 \begin{solution}
-	Your solution here.
-\end{solution}
-% rewq
 
+\bigskip
+\textbf{1.}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{Screenshot 2024-02-11 at 6.24.43 PM.png}
+    \caption{Enter Caption}
+    \label{fig:enter-label}
+\end{figure}
+
+For \(k=1\), the model captures every fluctuation in the training data, leading to a very noisy and highly variable plot. This behavior indicates that the model is extremely sensitive to the training data, reflecting overfitting. This is similar to kernel-based regression with a very small \(\tau\), where predictions are highly influenced by the nearest data points, resulting in a jagged interpolation that closely follows the training data. For \(k=3\), the plot smooths out compared to \(k=1\), as predictions are now the average of the three nearest neighbors. This reduces the noise and variability seen with \(k=1\), offering a more generalized view that still captures local trends without adhering too closely to individual outliers. This scenario is somewhat similar to a moderate \(\tau\) in kernel-based regression, where the influence of nearby points is balanced to provide a smoother but still responsive curve that reflects local data patterns. For \(k=N-1\) the model becomes overly smooth, essentially averaging almost the entire dataset to make a prediction. This results in a plot that might only capture the most general trend, significantly smoothing over all the finer details and variations in the data.\\
+
+Comparing kNN to kernel-based regression, we see that while both methods aim to interpolate the data based on the training set, they handle the influence of the training points differently. kNN directly averages the outputs of the nearest \(k\) training points, making its predictions explicitly dependent on the local data. On the other hand, kernel-based regression weights contributions from all training points based on their distance to the prediction point, with \(\tau\) controlling the demise of influence with distance. Therefore, while kNN with a small \(k\) and kernel-based regression with a small \(\tau\) both show sensitivity to local data variations, leading to overfitting, kNN with a large \(k\) and kernel-based regression with a large \(\tau\) tend to underfit by overly smoothing the data.
+
+\bigskip
+\textbf{2.}
+
+For \(k = 1\), the MSE loss is the lowest at approximately \(1.741\), suggesting that using the nearest neighbor provides the best fit among the options tested. This indicates a model that closely follows the training data, capturing local variations effectively but potentially at the risk of overfitting. As \(k\) increases to 3, the MSE loss rises to about \(3.891\), which is higher than for \(k = 1\). This increase suggests that averaging over more neighbors starts to introduce a bias, moving predictions away from the actual values. With \(k = 55\) and \(k = 56\), the MSE losses are significantly higher, at approximately \(9.664\) and \(9.529\) respectively, indicating substantial underfitting. At these levels, the model is averaging across a large portion of the dataset, diluting the influence of local data points and failing to capture the underlying trends effectively.
+
+The lowest MSE with \(k = 1\) implies that a kNN model that focuses on the most immediate neighbor provides the most accurate interpolation of the test data.
+
+\bigskip
+\textbf{3.}
+
+The k-Nearest Neighbors (kNN) algorithm exhibits a space complexity of \(O(N)\) because it necessitates storing the entire training dataset for prediction purposes, making the required storage space scale linearly with the size of the training set \(N\). For time complexity, particularly in perdiction, kNN involves \(O(N)\) operations for computing distances between a new input and all training instances, followed by sorting or partitioning to identify the \(k\) nearest neighbors, which can lead to complexities ranging from \(O(N \log N)\) for sorting all distances to \(O(N)\) for optimized selection algorithms. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Problem 4
@@ -374,7 +482,74 @@ MSE can no longer be directly compared.
 
 % qwer
 \begin{solution}
-	Your solution here.
+
+\bigskip
+\textbf{1.}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.80\linewidth]{output.png}
+        \caption{Resulting Plot}
+    \label{fig:enter-label}
+\end{figure}
+
+\bigskip
+\textbf{2.}
+
+\textbf{Part (a);}
+ \begin{itemize}
+     \item Train MSE: 4.82
+     \item Test MSE: 7.96
+ \end{itemize}
+
+
+\textbf{Part (b);}
+ \begin{itemize}
+     \item Train MSE: 5.53
+     \item Test MSE: 8.71
+ \end{itemize}
+
+\textbf{Part (c);}
+ \begin{itemize}
+     \item Train MSE: 2.88
+     \item Test MSE: 5.97
+ \end{itemize}
+
+
+\textbf{Part (d);}
+
+ \begin{itemize}
+     \item Train MSE: 0.64
+     \item Test MSE: 58.97
+ \end{itemize}
+
+(a) shows a moderate increase in MSE from training to test set, from 4.82 to 7.96. This might indicate a slight overfitting, as the model performs notably better on the training data than on unseen data, but the effect is relatively mild.
+
+(b) also exhibits an increase in MSE from the training set to the test set, from 5.53 to 8.71. Similar to part (a), this suggests a slight overfitting, where the model fits the training data fairly well but generalizes with less accuracy to the test data.
+  
+(c) has training MSE of 2.88 and test MSE of 5.97. The pattern remains consistent with mild overfitting, where the model performs better on the training data than on the test data, although the gap between training and test MSE is larger than in parts (a) and (b), indicating a better fit on the training data.
+  
+(d) exhibits a dramatic difference, with a very low training MSE of 0.64 and a very high test MSE of 58.97. This is a clear indication of significant overfitting.
+
+Parts (a), (b), and (c) exhibit signs of overfitting, with part (c) showing the best performance among them due to the lowest training MSE and a moderately low test MSE. However, the model in part (d) is the most overfitted, as evidenced by the vast disparity between its training and test MSE values. The exceptionally low training MSE in contrast to the extremely high test MSE suggests that the model captures the noise or idiosyncrasies in the training data rather than the underlying trend.
+
+\bigskip
+\textbf{3.}
+
+The transforms \(f\) in basis function linear regression serve to scale input features, improving numerical stability and model flexibility. By adjusting the range of input values, these transforms mitigate computational issues like overflow or underflow, especially relevant for large-scale inputs such as years. Also, scaling facilitates the modeling of complex nonlinear relationships through basis functions (polynomial, exponential, trigonometric), enabling a linear regression framework to capture intricate data patterns effectively.
+
+\bigskip
+\textbf{4.}
+
+The space complexity of linear regression primarily depends on the dimensionality of the feature space \(D\) after applying basis transformations, requiring \(O(ND)\) space to store the transformed training set \( \phi(\mathbf{X}) \). This is a departure from the simpler \(O(N)\) space requirement of kNN, which directly stores the training data without transformation. While the kernelized approach also stores the entire training set, it dynamically calculates kernel functions during prediction, avoiding the additional space needed for transformed features.\\
+
+In terms of time complexity, linear regression's efficiency of predicting is high. Predictions involve a dot product between the weight vector \( \mathbf{w} \) and the transformed input \( \phi(x^*) \), scaling with \(O(D)\), making it relatively efficient, especially when \(D\) is not excessively large. This contrasts with the \(O(N)\) prediction complexity of both kNN and kernelized regression, where computations depend on the entire training set size, potentially making these methods slower for predictions in large datasets.
+
+\bigskip
+\textbf{5.}
+
+kNN, with its reliance on the nearest neighbors, shows simplicity and effectiveness for data where proximity correlates strongly with outcomes, yet its performance decreases with increasing dataset size or dimensionality due to computational inefficiencies and dimensionality. Kernelized regression, utilizing kernel functions to encapsulate data similarities, showes its strength in modeling complex, nonlinear relationships without necessitating high-dimensional feature expansions, though at the expense of computational intensity and the nuanced selection of kernel parameters.Linear regression emerged as a versatile technique, combinig the interpretability of linear models with the capacity to approximate nonlinear phenomena through feature transformations. The empirical analysis across these regression techniques highlights no universally optimal solution; instead, the appropriateness of each method pivots on the dataset's nature, copmutation power, etc.
+
 \end{solution}
 % rewq
 
@@ -431,7 +606,93 @@ $y$ are scalars, $w$ is also a scalar.
 \end{problem}
 
 \begin{solution}
-	Your solution here.
+
+\bigskip
+\textbf{1.}
+
+Expanding the squared term and taking the expectation gives:
+$$
+E_{x, y}[(y - wx)^2] = E_{x, y}[y^2 - 2wxy + w^2x^2]
+$$
+
+which can be broken down into:
+$$
+E_{x, y}[y^2] - 2wE_{x, y}[xy] + w^2E_{x, y}[x^2]
+$$
+
+To find the \(w\) that minimizes this expression, we take the derivative with respect to \(w\) and set it to zero:
+$$
+\frac{d}{dw}(E_{x, y}[y^2] - 2wE_{x, y}[xy] + w^2E_{x, y}[x^2]) = 0
+$$
+
+Simplifying, we get:
+$$
+-2E_{x, y}[xy] + 2wE_{x, y}[x^2] = 0
+$$
+
+Solving for \(w\), we find:
+$$
+w = \frac{E_{x, y}[xy]}{E_{x, y}[x^2]}
+$$
+
+We find that optimal \(w\) that minimizes the expected squared loss for a linear model \(\hat{y} = wx\) under the joint distribution \(p(x, y)\) is given by the ratio of the covariance of \(x\) and \(y\) to the variance of \(x\), which makes sense with the intuition that the slope in a linear regression model reflects how much \(y\) changes with \(x\), normalized by the variability in \(x\).
+
+
+\bigskip
+\textbf{2.}
+
+\textbf{Estimating \(E_{x, y}[yx]\)
+}
+
+The expected value \(E_{x, y}[yx]\) can be estimated by the sample mean of the product of \(x\) and \(y\) for all observed pairs. The unbiased and consistent estimator for \(E_{x, y}[yx]\) is given by:
+
+$$
+\hat{E}_{x, y}[yx] = \frac{1}{N} \sum_{n=1}^N x_n y_n
+$$
+
+\textbf{Estimating \(E_x[x^2]\)
+}
+
+Similarly, the expected value \(E_x[x^2]\) represents the second moment about the origin for \(x\). It can be estimated from the data as:
+
+$$
+\hat{E}_x[x^2] = \frac{1}{N} \sum_{n=1}^N x_n^2
+$$
+
+This is the sample mean of the squared values of \(x\), providing an unbiased and consistent estimate of \(E_x[x^2]\).
+
+\bigskip
+\textbf{3.}
+
+The textbook formula is for a more general case where \(\mathbf{X}\) is a design matrix with multiple features for each observation, and \(\mathbf{w}^*\) is a vector of weights. The formula given is:
+
+$$
+\mathbf{w}^* = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
+$$
+
+The key difference is in the dimensionality of the problem. The expression for \(w\) in the simple linear regression case is scalar, focusing on a single predictor variable \(x\) and a single response variable \(y\). however, the \(\mathbf{w}^*\) from the textbook accounts for multiple predictors for each observation.
+When we  substitute empirical moments into the simple linear regression formula, we're essentially using specific instances of the more general matrix operations. Basically, the formula for \(\mathbf{w}^*\) generalizes the concept of finding the optimal weights to multiple dimensions. If we were to consider the simple linear regression scenario as a special case of the multiple regression, the matrix formula would yield the same insight as the scalar formula derived from empirical moments: the weight vector minimizes the squared error loss between the predicted and actual values.
+
+\bigskip
+\textbf{4.}
+
+The derivations do not explicitly rely on the assumption that \(x\) and \(y\) are jointly Gaussian.
+
+The formula for the optimal \(w\),
+   $$
+   w = \frac{E_{x, y}[xy]}{E_{x, y}[x^2]},
+   $$
+was derived based on minimizing the expected squared loss, \(E_{x, y}[(y - wx)^2]\), without making any specific assumptions about the distribution of \(x\) and \(y\). This derivation is purely algebraic and relies on the properties of expectations and does not necessitate any particular distributional form for \(x\) and \(y\). The formulas to estimate \(E_{x, y}[yx]\) and \(E_x[x^2]\) from observed data,
+   $$
+   \hat{E}_{x, y}[yx] = \frac{1}{N} \sum_{n=1}^N x_n y_n
+   $$
+   and
+   $$
+   \hat{E}_x[x^2] = \frac{1}{N} \sum_{n=1}^N x_n^2,
+   $$
+are based on the sample means of products and squares of the observed values. These estimations are standard procedures that do not assume any specific distribution for \(x\) and \(y\); they are applicable as long as the law of large numbers holds, which does not require \(x\) and \(y\) to be jointly Gaussian.
+While the derivations did not assume a joint Gaussian distribution, many probabilistic linear regression models do make this assumption because Gaussian distributions has desirable properties, such as being fully described by their mean and variance, and the linear transformations of Gaussian variables are also Gaussian, which simplifies analysis. Also, under certain conditions, averages of random variables converge in distribution to a Gaussian, even whn the original variables themselves are not Gaussian. This makes the Gaussian assumption reasonable for a wide range of applications.
+
 \end{solution}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -443,5 +704,9 @@ $y$ are scalars, $w$ is also a scalar.
 \subsection*{Collaborators and Resources}
 Whom did you work with, and did you use any resources beyond cs181-textbook and your notes?
 
+\begin{itemize}
+    \item Wikipedia
+    \item Stat111 textbook
+\end{itemize}
 
 \end{document}
