@@ -244,39 +244,116 @@ given by
     \item[1.]
       Answer:
       \[
-        \arg \max_{\theta} \log p(Y = y \mid \theta) =
+        \arg \max_{\theta} \log p(Y = y \mid \theta) = 
       \]
       Derivation:
+
+The log likelihood of observing \(Y = y\) given \(\theta\) is the natural logarithm of the PMF:
+
+$$
+\log p(Y=y|\theta) = \log \binom{N}{y} + y\log(\theta) + (N-y)\log(1-\theta)
+$$
+
+\(\log \binom{N}{y}\) is a constant with respect to \(\theta\), so it does not affect the optimization. The derivative of the log likelihood with respect to \(\theta\) is needed to find the MLE. Setting this derivative equal to zero will give us the value of \(\theta\) that maximizes the likelihood:
+
+$$
+\frac{d}{d\theta} \log p(Y=y|\theta) = \frac{d}{d\theta} \left( y\log(\theta) + (N-y)\log(1-\theta) \right)
+$$
+
+Taking the derivative, we get:
+
+$$
+\frac{y}{\theta} - \frac{N-y}{1-\theta} = 0
+$$
+
+Solving for \(\theta\), we multiply through by \(\theta(1-\theta)\) to clean the denominators:
+
+$$
+y(1-\theta) - (N-y)\theta = 0
+$$
+
+Expanding and rearranging terms gives:
+
+$$
+y - y\theta - N\theta + y\theta = 0
+$$
+
+Simplifying, we find:
+
+$$
+y = N\theta
+$$
+
+Solving for \(\theta\), we get the MLE of \(\theta\):
+
+$$
+\theta = \frac{y}{N}
+$$
+
+Thus, the MLE for \(\theta\), the probability of observing a head in a single coin flip, is the proportion of heads observed in the sample of \(N\) flips.
 
     \item[2.]
       \begin{enumerate}
         \item
-
+The Beta distribution, parameterized by \(\alpha\) and \(\beta\), shows a wide range of shapes across the interval [0, 1], making it highly versatile for modeling probabilities. When both \(\alpha\) and \(\beta\) are equal to 1, the Beta distribution simplifies to the Uniform distribution, indicating complete uncertainty with all values of \(\theta\) equally likely. As \(\alpha\) and \(\beta\) increase above 1, the distribution becomes unimodal and can skew towards 0 or 1, reflecting preferences for lower or higher probabilities, respectively. With \(\alpha < 1\) and \(\beta < 1\), it adapts a U-shape, favoring probabilities near the extremes. This flexibility allows the Beta distribution to represent a wide range of prior beliefs abot a probability parameter in Bayesian analysis, with the Beta(1,1) serving as a neutral, non-informative prior that assumes no preference between outcomes.
         \item
 
               Parameters:
               \[
-                \alpha' =
+                \alpha' = y + \alpha\
               \]
 
               \[
-                \beta' =
+                \beta' = N - y + \beta\
               \]
 
               Derivation:
 
+The prior distribution for \(\theta\) under a Beta model is:
+
+$$
+p(\theta) = \frac{\theta^{\alpha - 1} (1 - \theta)^{\beta - 1}}{B(\alpha, \beta)}
+$$
+
+where \(B(\alpha, \beta)\) is the Beta function as a normalizing constant to ensure the distribution integrates to 1 over its domain. For the purpose of deriving the posterior, we can ignore the Beta function since it's a constant with respect to \(\theta\).
+
+The posterior distribution is proportional to the product of the likelihood and the prior:
+
+$$
+p(\theta | Y = y) \propto p(Y = y | \theta) \cdot p(\theta)
+$$
+
+Substituting the expressions for the likelihood and the prior, we get:
+
+$$
+p(\theta | Y = y) \propto \theta^y (1 - \theta)^{N - y} \cdot \theta^{\alpha - 1} (1 - \theta)^{\beta - 1}
+$$
+
+Combining like terms, we find:
+
+$$
+p(\theta | Y = y) \propto \theta^{y + \alpha - 1} (1 - \theta)^{N - y + \beta - 1}
+$$
+
+This expression is recognized as the kernel of a Beta distribution with updated parameters \(\alpha' = y + \alpha\) and \(\beta' = N - y + \beta\). Therefore, the posterior distribution is:
+
+$$
+p(\theta | Y = y) = \text{Beta}(\theta | \alpha + y, \beta + N - y)
+$$
+
+This proves that the Beta distribution is a conjugate prior for the Binomial distribution, as the posterior distribution remains within the same family (Beta) as the prior distribution, with parameters updated based on the observed data.
       \end{enumerate}
 
     \item[3.]
 
       \begin{enumerate}
         \item
-
+Using posterior point estimates, such as the mean and mode, in the context of a Beta-Binomial conjugate pair, especially with parameters \(\alpha, \beta < 1\), presents a trade-off between simplicity and the risk of oversimplification. While these estimates provide a singular, easily interpretable value that can facilitate decision-making and communication, they may inadequately represent the underlying uncertainty and the distribution's shape—particularly in scenarios where the prior is U-shaped, indicating a belief that the parameter \(\theta\) is likely near 0 or 1. In such cases, point estimates could misleadingly suggest a moderate value of \(\theta\) that the actual distribution deems relatively improbable. 
         \item
               \begin{align*}
-                \theta_{\text{post mean}} = \mean [\theta \mid Y = y]     & = \\
-                \theta_{\text{MAP}} =\arg \max_{\theta}p(\theta \mid Y=y) & = \\
-                \mathrm{Var}(\theta \mid Y = y)                           & =
+                \theta_{\text{post mean}} = \mean [\theta \mid Y = y] = \frac{\alpha + y}{\alpha + y + \beta + N - y} = \frac{\alpha + y}{\alpha + \beta + N} &  \\
+                \theta_{\text{MAP}} =\arg \max_{\theta}p(\theta \mid Y=y) = \frac{\alpha + y - 1}{\alpha + y + \beta + N - y - 2} = \frac{\alpha + y - 1}{\alpha + \beta + N - 2} &  \\
+                \mathrm{Var}(\theta \mid Y = y)                            = \frac{(\alpha + y)(\beta + N - y)}{(\alpha + y + \beta + N - y)^2(\alpha + y + \beta + N - y + 1)} = \frac{(\alpha + y)(\beta + N - y)}{(\alpha + \beta + N)^2(\alpha + \beta + N + 1)}
               \end{align*}
 
       \end{enumerate}
@@ -285,45 +362,69 @@ given by
 
       \begin{enumerate}
         \item
-
+The parameters \(\alpha\) and \(\beta\) of the Beta distribution significantly influence the MAP estimate, serving as pseudo-observations that shape our prior beliefs about the probability of observing heads (\(\theta\)). To encode a prior belief that a coin is fair, one would set \(\alpha\) and \(\beta\) to equal values that reflect symmetry around \(\theta = 0.5\), indicating no inherent bias towards heads or tails. A common and effective choice is \(\alpha = \beta = 2\), which not only centers the distribution around 0.5 but also expresses a moderate level of confidence in the coin's fairness. This choice avoids extremes.
         \item
               \begin{enumerate}
-                \item
+                \item\
+The variance of the prior decreases as the variance of the posterior decreases, reflecting the accumulation of information from observed data; specifically, as \(\alpha\) and \(\beta\) increase due to observed heads and tails, the posterior distribution becomes more peaked and less uncertain.
 
                 \item
-
+To encode a stronger prior belief, one would choose larger values of \(\alpha\) and \(\beta\) (keeping \(\alpha = \beta\) for symmetry), which decreases the prior variance and indicates a higher confidence in the prior knowledge; oppositely, smaller values of \(\alpha\) and \(\beta\) increase the variance, reflecting weaker prior beliefs and greater uncertainty about \(\theta\).
                 \item
+As more samples \(n\) are observed, the posterior variance decreases, reflecting the increased precision in our estimate of \(\theta\); this is because the parameters of the posterior distribution, \(\alpha + y\) and \(\beta + n - y\), grow with the number of observations, making the distribution narrower and our estimates more certain.
               \end{enumerate}
 
       \end{enumerate}
-
     \item[5.]
 
       \begin{enumerate}
         \item
               MSE term:
               \[
-                M =
+                M = (y - n\theta)^2
               \]
 
               Regularization term:
               \[
-                R =
+                R = -a\theta + b\theta^2
               \]
 
               Loss function, as a function of the MSE and regularization term:
               \[
-                \ell(\theta) =
+                \ell(\theta) = (y - n\theta)^2 - a\theta + b\theta^2
               \]
 
-              MSE term derivation:
+              MSE term derivation: This is derived from the general form of MSE, \((\text{observed} - \text{predicted})^2\), by substituting \(y\) for the observed value and \(n\theta\) for the predicted value based on our model's probability of success.
 
-              Regularization term derivation:
+              Regularization term derivation: we consider the log of the Beta distribution's PDF (ignoring constants that do not depend on \(\theta\)):
 
-              Regularization term interpretation:
+\[\log(\theta^{\alpha-1}(1-\theta)^{\beta-1}) = (\alpha-1)\log(\theta) + (\beta-1)\log(1-\theta)\]
+
+Taking the derivative with respect to \(\theta\) gives us the gradient of the log-prior, which, when set to zero, helps identify the mood. For the regularization term to reflect this prior information, we relate it to the derivative of the log-prior, leading to a form that penalizes deviations from the prior's mode.
+
+              Regularization term interpretation: 
+This term can be interpreted by completing the square, which aligns it with the form of a quadratic penalty on \(\theta\). This quadratic form is reminder of the Gaussian prior in linear regression, where the coefficients are regularized towards zero. In our Bayesian context, the regularization term effectively acts to pull \(\theta\) towards the mode of the prior distribution, with \(a\) and \(b\) adjusting the strength of this pull basd on the prior's parameters \(\alpha\) and \(\beta\).
 
         \item
+As \(n \rightarrow \infty\), both the posterior mean \(\theta_{\text{post mean}}\) and the posterior MAP estimate \(\theta_{\text{MAP}}\) converge to values that reflect the observed data's influence increasingly over the prior. This convergence is under the assumption that \(y\), the number of observed successes (e.g., heads in coin flips), also increases in a way that reflects the true underlying probability \(\theta\) of success.
 
+The posterior mean is given by:
+
+\[
+\theta_{\text{post mean}} = \frac{\alpha + y}{\alpha + \beta + n}
+\]
+
+As \(n \rightarrow \infty\), assuming \(y/n \rightarrow \theta\) (the true probability of success), the fraction \(\frac{y}{n}\) dominates the terms \(\alpha\) and \(\beta\) in the numerator and denominator. Thus, \(\theta_{\text{post mean}}\) approaches the true probability of success \(\theta\), reflecting the law of large numbers where the observed proportion of successes converges to the true probability of success.\\
+
+The posterior MAP estimate is given by:
+
+\[
+\theta_{\text{MAP}} = \frac{\alpha + y - 1}{\alpha + \beta + n - 2}
+\]
+
+Similarly, as \(n \rightarrow \infty\), the influence of \(\alpha\) and \(\beta\) becomes negligible, and \(\theta_{\text{MAP}}\) also converges to the true probability of success \(\theta\), assuming \(y/n \rightarrow \theta\).\\
+
+The MLE estimate for \(\theta\) in a binomial setting is \(\theta_{\text{MLE}} = \frac{y}{n}\). As \(n \rightarrow \infty\), \(\theta_{\text{MLE}}\) directly converges to the true probability of success \(\theta\), as it is purely based on the observed data without any influence from a prior distribution. Both \(\theta_{\text{post mean}}\) and \(\theta_{\text{MAP}}\) converge to the true underlying probability of success \(\theta\) as \(n \rightarrow \infty\), similar to the MLE estimate.
       \end{enumerate}
 
   \end{enumerate}
@@ -459,70 +560,148 @@ where $\hat{y}$ is a scalar output of the net when passing in the single datapoi
 \begin{answer}
   \begin{enumerate}
     \item \begin{itemize}
-            \item $\bold{W}_1 : $
-            \item $\bold{b}_1 : $
-            \item $\bold{W}_2 : $
-            \item $\bold{b}_2 : $
-            \item $\bold{a}_1 : $
-            \item $\bold{z}_1 : $
-            \item $a_2 : $
-            \item $\hat{y} : $
+            \item $\bold{W}_1 : (H, M)$
+            The weights of the first layer connect the input layer with $M$ dimensions to the hidden layer with $H$ dimensions.
+            \item $\bold{b}_1 : (H, 1)$ 
+            The bias of the first layer is added to each of the $H$ dimensions of the hidden layer.
+            \item $\bold{W}_2 : (1, H)$ 
+            The weights of the second layer connect the hidden layer with $H$ dimensions to the output layer with 1 dimension (since it's a binary classification problem).
+            \item $\bold{b}_2 : (1, 1)$ The bias of the second layer is added to the output layer, which has only 1 dimension.
+            \item $\bold{a}_1 : (H, 1)$ 
+            The result of the linear transformation $\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1$ before the sigmoid activation in the first layer. Since $\mathbf{W}_1$ maps $M$ dimensions to $H$ dimensions and $\mathbf{b}_1$ is added element-wise to each of the $H$ dimensions, $\mathbf{a}_1$ has the dimensionality of $H \times 1$.
+            \item $\bold{z}_1 : (H, 1)$ 
+            The result of applying the sigmoid activation function element-wise to $\mathbf{a}_1$.
+            \item $a_2 : (1, 1)$ 
+            The result of the linear transformation $\mathbf{W}_2 \mathbf{z}_1 + \mathbf{b}_2$ before the sigmoid activation in the second layer. Since $\mathbf{W}_2$ maps $H$ dimensions to 1 dimension and $\mathbf{b}_2$ is a scalar added to this result, $a_2$ is a scalar.
+            \item $\hat{y} : (1, 1)$ 
+            The result of applying the sigmoid activation function to $a_2$. Since $a_2$ is a scalar, $\hat{y} = z_2$ is also a scalar.
           \end{itemize}
-
     \item \begin{enumerate}
             \item
                   \begin{align*}
                     % \frac {\partial L} {\partial \hat{y}} &= \frac y {\hat{y}} + \frac {1-y} {\hat{y} - 1} \\ 
                     % \frac {\partial  \hat{y}} {\partial z_2} &= \sigma (z_2) (1 - \sigma(z_2)) \\
                     % \frac {\partial z_2} {\partial b_2} &= 1 \\
-                    \frac {\partial L}{\partial b_2} & =
+                    \frac {\partial L}{\partial b_2} & = \hat{y} - y
+                    The derivative of \(L\) with respect to \(\hat{y}\) is:
+
+$$
+\frac{\partial L}{\partial \hat{y}} = -\left(\frac{y}{\hat{y}} - \frac{1 - y}{1 - \hat{y}}\right)
+$$
+
+The derivative of \(\hat{y}\) with respect to \(a_2\) (since \(\hat{y} = \sigma(a_2)\)) is:
+
+$$
+\frac{\partial \hat{y}}{\partial a_2} = \hat{y}(1 - \hat{y})
+$$
+
+Finally, since \(a_2 = \mathbf{W}_2 \mathbf{z}_1 + b_2\), the derivative of \(a_2\) with respect to \(b_2\) is 1. Thus, applying the chain rule:
+
+$$
+\frac{\partial L}{\partial b_2} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial a_2} \cdot \frac{\partial a_2}{\partial b_2} = -\left(\frac{y}{\hat{y}} - \frac{1 - y}{1 - \hat{y}}\right) \cdot \hat{y}(1 - \hat{y}) \cdot 1
+$$
+
+Simplifying, we get:
+
+$$
+\frac{\partial L}{\partial b_2} = \hat{y} - y
+$$
+
                   \end{align*}
 
             \item
                   \begin{align*}
-                    \frac {\partial L}{\partial W_2^h} & =
+                    \frac {\partial L}{\partial W_2^h} & = (\hat{y} - y) \cdot z_1^h
+                    Since \(a_2 = \mathbf{W}_2 \mathbf{z}_1 + b_2\), the derivative of \(a_2\) with respect to \(W_2^h\) is \(z_1^h\), the \(h\)th element of \(\mathbf{z}_1\). Thus:
+
+$$
+\frac{\partial L}{\partial W_2^h} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial a_2} \cdot \frac{\partial a_2}{\partial W_2^h} = -\left(\frac{y}{\hat{y}} - \frac{1 - y}{1 - \hat{y}}\right) \cdot \hat{y}(1 - \hat{y}) \cdot z_1^h
+$$
+
+Simplifying, we get:
+
+$$
+\frac{\partial L}{\partial W_2^h} = (\hat{y} - y) \cdot z_1^h
+$$
+            \item
+                  \begin{align*}
+                    \frac {\partial L}{\partial b_1^h} & = (\hat{y} - y) \cdot W_2^h \cdot z_1^h(1 - z_1^h)
                   \end{align*}
+
+Given that \(a_1^h = W_1^{h, \cdot} \mathbf{x} + b_1^h\) and \(z_1^h = \sigma(a_1^h)\), we can write:
+
+$$
+\frac{\partial L}{\partial b_1^h} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial a_2} \cdot \frac{\partial a_2}{\partial z_1^h} \cdot \frac{\partial z_1^h}{\partial a_1^h} \cdot \frac{\partial a_1^h}{\partial b_1^h}
+$$
+
+Since \(\frac{\partial a_2}{\partial z_1^h} = W_2^h\), \(\frac{\partial z_1^h}{\partial a_1^h} = z_1^h(1 - z_1^h)\), and \(\frac{\partial a_1^h}{\partial b_1^h} = 1\), we get:
+
+$$
+\frac{\partial L}{\partial b_1^h} = (\hat{y} - y) \cdot W_2^h \cdot z_1^h(1 - z_1^h)
+$$
 
             \item
                   \begin{align*}
-                    \frac {\partial L}{\partial b_1^h} & =
+                    \frac {\partial L}{\partial W_1^{h,m}} & =  (\hat{y} - y) \cdot W_2^h \cdot z_1^h(1 - z_1^h) \cdot x_m
                   \end{align*}
+                  
+Consider the path from \(W_1^{h, m}\) through \(a_1^h\), \(z_1^h\), \(a_2\), \(\hat{y}\), and \(L\).
 
-            \item
-                  \begin{align*}
-                    \frac {\partial L}{\partial W_1^{h,j}} & =
-                  \end{align*}
+$$
+\frac{\partial L}{\partial W_1^{h, m}} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial a_2} \cdot \frac{\partial a_2}{\partial z_1^h} \cdot \frac{\partial z_1^h}{\partial a_1^h} \cdot \frac{\partial a_1^h}{\partial W_1^{h, m}}
+$$
+
+Given \(\frac{\partial a_1^h}{\partial W_1^{h, m}} = x_m\), the \(m\)th element of \(\mathbf{x}\), we have:
+
+$$
+\frac{\partial L}{\partial W_1^{h, m}} = (\hat{y} - y) \cdot W_2^h \cdot z_1^h(1 - z_1^h) \cdot x_m
+$$
           \end{enumerate}
+        \end{enumerate}
+
 
     \item
 
           \begin{enumerate}
             \item
                   \begin{align*}
-                    v_1        & = \\
-                    v_2        & = \\
-                    v_3        & = \\
-                    v_4        & = \\
-                    v_5        & = \\
-                    v_6        & = \\
-                    v_7        & = \\
-                    f(x_1,x_2) & = \\
+                    v_1        & = \frac{\pi}{6}\\
+                    v_2        & = \sin\left(v_1\right) = \sin\left(\frac{\pi}{6}\right) = \frac{1}{2}\\
+                    v_3        & = \ln\left(v_2\right) = \ln\left(\frac{1}{2}\right) = -\ln(2) \\
+                    v_4        & = 1 \\
+                    v_5        & = \exp\left(v_4\right) = \exp(1) = e \\
+                    v_6        & = v_1 \cdot v_5 = \frac{\pi}{6} \cdot e \\
+                    v_7        & = v_3 + v_6 = -\ln(2) + \frac{\pi e}{6} \\
+                    f(x_1,x_2) & = v_7 = -\ln(2) + \frac{\pi e}{6}\\
                   \end{align*}
 
             \item
                   \begin{align*}
-                    \frac{\partial v_1}{\partial x_1} & = \\
-                    \frac{\partial v_2}{\partial x_1} & = \\
-                    \frac{\partial v_3}{\partial x_1} & = \\
-                    \frac{\partial v_4}{\partial x_1} & = \\
-                    \frac{\partial v_5}{\partial x_1} & = \\
-                    \frac{\partial v_6}{\partial x_1} & = \\
-                    \frac{\partial v_7}{\partial x_1} & = \\
-                    \frac{\partial f}{\partial x_1}   & =
+                    \frac{\partial v_1}{\partial x_1} & = 1\\
+                    \frac{\partial v_2}{\partial x_1} & = \frac{\partial v_2}{\partial x_1} = \cos(v_1) \cdot \frac{\partial v_1}{\partial x_1} = \cos(v_1)\\
+                    \frac{\partial v_3}{\partial x_1} & = \frac{\partial v_3}{\partial x_1} = \frac{1}{v_2} \cdot \frac{\partial v_2}{\partial x_1} = \frac{1}{v_2} \cdot \cos(v_1)\\
+                    \frac{\partial v_4}{\partial x_1} & = 0\\
+                    \frac{\partial v_5}{\partial x_1} & = 0\\
+                    \frac{\partial v_6}{\partial x_1} & = \frac{\partial v_6}{\partial x_1} = v_5 \cdot \frac{\partial v_1}{\partial x_1} + v_1 \cdot \frac{\partial v_5}{\partial x_1} = v_5\\
+                    \frac{\partial v_7}{\partial x_1} & = \frac{\partial v_3}{\partial x_1} + \frac{\partial v_6}{\partial x_1}\\
+                    \frac{\partial f}{\partial x_1}   & = \frac{\partial v_7}{\partial x_1}
                   \end{align*}
           \end{enumerate}
-
   \end{enumerate}
+
+
+Evaluating the derivatives at \(x_1 = \frac{\pi}{6}\) and \(x_2 = 1\), we find:
+
+\begin{align*}
+\frac{\partial v_1}{\partial x_1} & = 1 \\
+\frac{\partial v_2}{\partial x_1} & = \cos\left(\frac{\pi}{6}\right) \\
+\frac{\partial v_3}{\partial x_1} & = \frac{\cos\left(\frac{\pi}{6}\right)}{\sin\left(\frac{\pi}{6}\right)} \\
+\frac{\partial v_4}{\partial x_1} & = 0 \\
+\frac{\partial v_5}{\partial x_1} & = 0 \\
+\frac{\partial v_6}{\partial x_1} & = e \\
+\frac{\partial v_7}{\partial x_1} & = \sqrt{3} + e \\
+\frac{\partial f}{\partial x_1}   & = \sqrt{3} + e
+\end{align*}
 \end{answer}
 
 
@@ -601,44 +780,88 @@ In this problem, you will learn how to use PyTorch. This machine learning librar
       Code:
 
       \begin{lstlisting}[language=Python]
-n_inputs = 'not implemented'
-n_hiddens = 'not implemented'
-n_outputs = 'not implemented'
+n_inputs = 784
+n_hiddens = 256
+n_outputs = 10
 
-W1 = 'not implemented'
-b1 = 'not implemented'
-W2 = 'not implemented'
-b2 = 'not implemented'
+W1 = torch.randn(n_inputs, n_hiddens) * 0.01  # Weight matrix for the first layer
+b1 = torch.zeros(n_hiddens)  # Bias for the first layer
+W2 = torch.randn(n_hiddens, n_outputs) * 0.01  # Weight matrix for the second layer
+b2 = torch.zeros(n_outputs)  # Bias for the second layer
+
+params = [W1, b1, W2, b2]
 
 
 
 def relu(x):
-    'not implemented'
+  """
+  For each element, set 0 as minimum value and nothing as maximum value. S
+  hould not change shape of x.
 
+  :param x: a 2D numpy array of output of first transformation. Shape is (batch_size, n_hiddens)
+  :return: a 2D numpy array of output of first non-linearity. Shape is (batch_size, n_hiddens)
+  """
+  return torch.clamp(x, min=0)
 
+def softmax(X):
+  """
+  For each row, divide each exponentiated element by the sum of all exponentiated elements in that row. 
+  Should not change shape of X.
 
-def softmax(x):
-    'not implemented'
+  :param X: a 2D numpy array of output of second transformation. Shape is (batch_size, n_outputs)
+  :return: a 2D numpy array of output of second non-linearity. Shape is (batch_size, n_outputs)
+  """
 
+  exp_X = torch.exp(X - torch.max(X, dim=1, keepdim=True).values)  # Shift for numerical stability
+  sum_exp_X = torch.sum(exp_X, dim=1, keepdim=True)
+  return exp_X / sum_exp_X
 
 
 def net(X):
-  'not implemented'
+    """
+    Performs the forward pass of the network.
 
-
+    :param X: A 2D PyTorch tensor of input images. Shape is (batch_size, 28*28)
+              where each image is flattened to a 784 element vector.
+    :return: A 2D PyTorch tensor after applying the network. Shape is (batch_size, n_outputs)
+    """
+    # Flatten the input images
+    X_flattened = X.reshape(X.shape[0], -1)  # Reshaping to (batch_size, 784)
+    # Compute the hidden layer activations
+    H = relu(X_flattened @ W1 + b1)
+    # Compute the output layer activations
+    O = softmax(H @ W2 + b2)
+    
+    return O
 
 def cross_entropy(y_hat, y):
-  'not implemented'
+  """
+  Implement cross entropy loss as defined in the formula above.
+  :param y_hat: a 2D numpy array of shape (batch_size, 10) where each row is a probability vector of length 10.
+  :param y: a 1D numpy array of shape (batch_size) where each element is a label.
 
+  :return: a 1D numpy array of shape (batch_size) representing the cross entropy losses.
+  """
 
+  correct_probs = y_hat.gather(1, y.unsqueeze(1)).squeeze()
+  loss = -torch.log(correct_probs)
+  return loss.mean() 
 
 def sgd(params, lr=0.1):
-  'not implemented'
+  """
+  Implements stochastic gradient descent. For each param, subtract the gradient times the learning rate.
+  The gradient for each param is stored in param.grad. After updating each param, set its gradient to zero.
 
+  :param params: a list of parameters to update.
+  :param lr: the learning rate.
 
+  :return: None
+  """
+  with torch.no_grad():
+    for param in params:
+        param -= lr * param.grad
+        param.grad.zero_() 
 
-def train(net, params, train_iter, loss_func=cross_entropy, updater=sgd):
-  'not implemented'
 
 \end{lstlisting}
 
